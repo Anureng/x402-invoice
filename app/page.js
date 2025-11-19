@@ -1,6 +1,6 @@
 import { InvoiceHeader } from './component/invoice-header'
 import { WalletSection } from './component/wallet-section'
-import { InvoiceDetails } from './component/invoice-details'
+// import { InvoiceDetails } from './component/invoice-details'
 import { PaymentMethods } from './component/payment-methods'
 import { Footer } from './component/footer'
 
@@ -17,11 +17,12 @@ export default function Home() {
       <div className="relative z-10">
         <InvoiceHeader />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="max-w-3xl mx-auto space-y-12">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-8"> */}
             {/* Left side - Invoice and Details */}
-            <div className="lg:col-span-2 space-y-6">
-              <InvoiceDetails />
-            </div>
+              {/* <div className="lg:col-span-2 space-y-6">
+                <InvoiceDetails />
+              </div> */}
 
             {/* Right side - Wallet and Payment */}
             <div className="space-y-6">

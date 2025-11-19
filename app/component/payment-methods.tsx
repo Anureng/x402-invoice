@@ -33,7 +33,7 @@ export function PaymentMethods() {
 
   return (
     <div className="space-y-4">
-      <Card className="border border-border/50 bg-card/50 backdrop-blur-sm p-6">
+      {/* <Card className="border border-border/50 bg-card/50 backdrop-blur-sm p-6">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/20 border border-primary/40">
@@ -71,7 +71,7 @@ export function PaymentMethods() {
             ))}
           </div>
         </div>
-      </Card>
+      </Card> */}
 
       <Card className="border border-border/50 bg-gradient-to-br from-primary/20 to-primary/10 backdrop-blur-sm p-6">
         <div className="space-y-4">
