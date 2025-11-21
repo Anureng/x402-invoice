@@ -21,6 +21,25 @@ export function WalletProvider({ children }) {
     setIsConnecting(loading)
   }, [loading])
 
+  // Mock API call to fetch supported network
+  useEffect(() => {
+    const fetchNetwork = async () => {
+      try {
+        // Simulate API call
+        // In real app: const response = await fetch('/api/network'); const data = await response.json();
+        // For now, we'll mock it to return 'base' or any other supported network
+        // You can change this to 'solana', 'avalanche', 'polygon' to test
+        const mockNetwork = "base";
+        console.log("Fetched network from API:", mockNetwork);
+        setSelectedNetwork(mockNetwork);
+      } catch (error) {
+        console.error("Failed to fetch network:", error);
+      }
+    };
+
+    fetchNetwork();
+  }, []);
+
   useEffect(() => {
     async function switchNetworkMain(network) {
       if (network === "base") await switchNetwork(base);
