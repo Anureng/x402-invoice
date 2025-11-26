@@ -22,21 +22,7 @@ export function WalletProvider({ children }) {
     setIsConnecting(loading)
   }, [loading])
 
-  // Mock API call to fetch supported network
-  useEffect(() => {
-    const fetchNetwork = async () => {
-      try {
-        const response = await fetch('/api/payload?id=2');
-        const data = await response.json();
-        setSelectedNetwork(data.network);
-        setPayDetails(data)
-      } catch (error) {
-        console.error("Failed to fetch network:", error);
-      }
-    };
 
-    fetchNetwork();
-  }, []);
 
   useEffect(() => {
     async function switchNetworkMain(network) {
@@ -57,6 +43,8 @@ export function WalletProvider({ children }) {
     isConnecting,
     selectedNetwork,
     payDetails,
+    setPayDetails,
+    setSelectedNetwork,
     connectWallet: async () => {
       setIsConnecting(true)
       try {

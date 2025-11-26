@@ -1,20 +1,23 @@
 import { NextResponse } from "next/server";
 import { X402PaymentHandler } from '@payai/x402-solana/server';
 
-const x402 = new X402PaymentHandler({
-    network: 'solana',
-    treasuryAddress: "uKQ77M8ee7Jq2TKoZSyUUWDbxv9Eva8rv8DZn2DVLXm",
-    facilitatorUrl: 'https://facilitator.payai.network',
-});
-
 export async function POST(request) {
     try {
-        const { userWallet, amount, asset, description } = await request.json();
+        const { userWallet, amount, asset, description, payID } = await request.json();
 
         if (!userWallet || !amount) {
             return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
         }
 
+        console.log(payID);
+        const gotData = { treasuryAddress: "FmxZrCG5D4MSBySHx4Yffb4nFte8Tei5YTRKwxxw3yuX" };
+
+
+        const x402 = new X402PaymentHandler({
+            network: 'solana',
+            treasuryAddress: gotData.treasuryAddress,
+            facilitatorUrl: 'https://facilitator.payai.network',
+        });
         // 1. Extract payment header
         const paymentHeader = x402.extractPayment(request.headers);
 
