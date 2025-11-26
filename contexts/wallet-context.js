@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react"
 import { useAppKit, useAppKitState, useAppKitAccount, useDisconnect, useAppKitNetwork } from "@reown/appkit/react";
-import { base, polygon, avalanche } from "@reown/appkit/networks";
+import { base, polygon, avalanche, baseSepolia } from "@reown/appkit/networks";
 // import { useAppKitProvider } from "@reown/appkit/react";
 
 const WalletContext = createContext()
@@ -10,12 +10,13 @@ const WalletContext = createContext()
 export function WalletProvider({ children }) {
   const [isConnecting, setIsConnecting] = useState(false)
   const [walletAddress, setWalletAddress] = useState("")
-  const [selectedNetwork, setSelectedNetwork] = useState("base");
   const { address, isConnected } = useAppKitAccount();
   const { disconnect } = useDisconnect();
   const { loading } = useAppKitState();
   const { open } = useAppKit();
-  const { chainId, switchNetwork } = useAppKitNetwork()
+  const { switchNetwork } = useAppKitNetwork()
+  const [selectedNetwork, setSelectedNetwork] = useState("base");
+  const [payDetails, setPayDetails] = useState(null);
 
   useEffect(() => {
     setIsConnecting(loading)
@@ -25,13 +26,10 @@ export function WalletProvider({ children }) {
   useEffect(() => {
     const fetchNetwork = async () => {
       try {
-        // Simulate API call
-        // In real app: const response = await fetch('/api/network'); const data = await response.json();
-        // For now, we'll mock it to return 'base' or any other supported network
-        // You can change this to 'solana', 'avalanche', 'polygon' to test
-        const mockNetwork = "base";
-        console.log("Fetched network from API:", mockNetwork);
-        setSelectedNetwork(mockNetwork);
+        const response = await fetch('/api/payload?id=2');
+        const data = await response.json();
+        setSelectedNetwork(data.network);
+        setPayDetails(data)
       } catch (error) {
         console.error("Failed to fetch network:", error);
       }
@@ -42,7 +40,7 @@ export function WalletProvider({ children }) {
 
   useEffect(() => {
     async function switchNetworkMain(network) {
-      if (network === "base") await switchNetwork(base);
+      if (network === "base") await switchNetwork(baseSepolia);
       if (network === "polygon") await switchNetwork(polygon);
       if (network === "avalanche") await switchNetwork(avalanche);
     }
@@ -58,15 +56,15 @@ export function WalletProvider({ children }) {
     walletAddress,
     isConnecting,
     selectedNetwork,
-    connectWallet: async (adapter) => {
+    payDetails,
+    connectWallet: async () => {
       setIsConnecting(true)
       try {
-        if (adapter === "solana") {
+        if (selectedNetwork === "solana") {
           await open({ namespace: "solana" });
         } else {
           await open({ namespace: "eip155" });
         }
-        setSelectedNetwork(adapter)
         // await open({ view: "Connect" })
       } catch (error) {
         console.error("Error connecting wallet:", error)

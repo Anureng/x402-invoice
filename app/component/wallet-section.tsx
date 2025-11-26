@@ -33,13 +33,13 @@ export function WalletSection() {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-medium text-muted-foreground">Wallet</h2>
         {isConnected && (
-           <span className="text-xs bg-white/10 px-2 py-1 rounded-full text-white">{selectedNetwork}</span>
+          <span className="text-xs bg-white/10 px-2 py-1 rounded-full text-white">{selectedNetwork}</span>
         )}
       </div>
 
       {!isConnected ? (
         <Button
-          onClick={() => connectWallet("base")}
+          onClick={() => connectWallet()}
           className="w-full h-12 bg-white text-black hover:bg-gray-200 font-medium transition-colors rounded-lg"
         >
           Connect Wallet
@@ -47,14 +47,14 @@ export function WalletSection() {
       ) : (
         <div className="space-y-3">
           <div className="p-4 rounded-lg border border-white/10 bg-black/20 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900" />
-                <div>
-                  <p className="text-sm font-medium">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
-                  <p className="text-xs text-muted-foreground">Connected</p>
-                </div>
-             </div>
-             <Button
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900" />
+              <div>
+                <p className="text-sm font-medium">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+                <p className="text-xs text-muted-foreground">Connected</p>
+              </div>
+            </div>
+            <Button
               onClick={disconnectWalletMain}
               variant="ghost"
               size="sm"

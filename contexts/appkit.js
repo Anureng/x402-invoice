@@ -2,7 +2,7 @@
 
 import { createAppKit } from "@reown/appkit/react";
 import { SolanaAdapter } from "@reown/appkit-adapter-solana/react";
-import { solana, base, polygon, avalanche } from "@reown/appkit/networks";
+import { solana, base, polygon, avalanche, baseSepolia } from "@reown/appkit/networks";
 import { EthersAdapter } from '@reown/appkit-adapter-ethers'
 import { WalletProvider } from "@/contexts/wallet-context";
 
@@ -28,7 +28,7 @@ const metadata = {
 createAppKit({
     adapters: [ethersAdapter, solanaWeb3JsAdapter],
     projectId,
-    networks: [solana, base, polygon, avalanche],
+    networks: [solana, base, polygon, avalanche, baseSepolia],
     metadata,
     features: {
         analytics: true,

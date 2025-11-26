@@ -21,7 +21,7 @@ export default function Home() {
           </div>
 
           <div className="text-center">
-            <p className="text-xs text-muted-foreground opacity-50">Powered by x402fi Protocol</p>
+            <p className="text-xs text-muted-foreground opacity-50">Powered by PayAI</p>
           </div>
         </div>
       </main>
