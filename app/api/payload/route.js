@@ -22,6 +22,10 @@ export async function GET(request) {
             callback_url: "https://mywebsite.com/paymentSuccess",
         }
 
+        if (returnedValue.network != "solana") {
+            return NextResponse.json({ success: false }, { status: 400 });
+        }
+
         if (id == 1) {
             return NextResponse.json({
                 network: returnedValue.network,
