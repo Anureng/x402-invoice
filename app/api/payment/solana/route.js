@@ -3,15 +3,14 @@ import { X402PaymentHandler } from '@payai/x402-solana/server';
 
 export async function POST(request) {
     try {
-        const { userWallet, amount, asset, description, payID } = await request.json();
+        const { userWallet, amount, asset, description, payID, server_callback_api } = await request.json();
 
         if (!userWallet || !amount) {
             return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
         }
 
-        console.log(payID);
-        const gotData = { treasuryAddress: "FmxZrCG5D4MSBySHx4Yffb4nFte8Tei5YTRKwxxw3yuX" };
-
+        const res = await fetch(`https://www.x402fi.tech/api/payment/${payID}`);
+        const gotData = await res.json();
 
         const x402 = new X402PaymentHandler({
             network: 'solana',
@@ -32,7 +31,7 @@ export async function POST(request) {
             network: 'solana',
             config: {
                 description: description,
-                resource: `http://localhost:3000/api/payment/solana`,
+                resource: `https://www.x402fi.tech/api/payment/solana`,
                 // resource: `${process.env.NEXTAUTH_URL}/api/payment/solana`,
             }
         });
@@ -47,6 +46,34 @@ export async function POST(request) {
         const verified = await x402.verifyPayment(paymentHeader, paymentRequirements);
         if (!verified) {
             return NextResponse.json({ error: 'Invalid payment' }, { status: 402 });
+        }
+
+        const response = await fetch(`https://www.x402fi.tech/api/createInvoice`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                paymentId: payID,
+                status: 'paid',
+            }),
+        });
+
+        await response.json();
+
+        try {
+            await fetch(server_callback_api, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    payID: payID,
+                    status: 'paid',
+                }),
+            });
+        } catch (error) {
+            console.error("User API Failed:", error);
         }
 
         await x402.settlePayment(paymentHeader, paymentRequirements);

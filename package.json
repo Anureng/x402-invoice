@@ -17,6 +17,7 @@
     "@reown/appkit": "^1.8.14",
     "@reown/appkit-adapter-ethers": "^1.8.14",
     "@reown/appkit-adapter-solana": "^1.8.14",
+    "@solana/web3.js": "^1.98.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "ethers": "^6.15.0",
