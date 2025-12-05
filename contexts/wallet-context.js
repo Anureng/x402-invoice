@@ -22,8 +22,6 @@ export function WalletProvider({ children }) {
     setIsConnecting(loading)
   }, [loading])
 
-
-
   useEffect(() => {
     async function switchNetworkMain(network) {
       if (network === "base") await switchNetwork(baseSepolia);

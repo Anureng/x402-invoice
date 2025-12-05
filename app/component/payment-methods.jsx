@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useWallet } from "@/contexts/wallet-context";
 import { createX402Client } from "@payai/x402-solana/client";
 import { useAppKitProvider } from "@reown/appkit/react";
+import { Connection, PublicKey } from "@solana/web3.js";
 // import {
 //   decodeXPaymentResponse,
 //   wrapFetchWithPayment,
@@ -38,15 +39,17 @@ const CHAINS = [
   {
     name: "Solana",
     symbol: "SOL",
-    icon: "◎",
+    icon: <img src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png" alt="Solana" className="w-6 h-6 rounded-full" />,
     color: "from-green-400 to-teal-500",
     id: "solana",
   },
 ];
 
 export function PaymentMethods({ payID }) {
-  const { selectedNetwork, payDetails } = useWallet();
+  const { selectedNetwork, payDetails, isConnected } = useWallet();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [tokenSymbol, setTokenSymbol] = useState(null);
   const [currentChain, setCurrentChain] = useState(CHAINS[0]);
   const solanaWallet = useAppKitProvider("solana").walletProvider;
   const { walletProvider } = useAppKitProvider("eip155");
@@ -62,13 +65,75 @@ export function PaymentMethods({ payID }) {
     }
   }, [selectedNetwork]);
 
+  useEffect(() => {
+    const fetchSymbol = async () => {
+      if (payDetails?.address) {
+        try {
+          const response = await fetch(
+            "https://mainnet.helius-rpc.com/?api-key=59d15393-1c14-4115-b919-76b0ba1b6361",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                id: "get-asset",
+                method: "getAsset",
+                params: { id: payDetails.address },
+              }),
+            }
+          );
+          const { result } = await response.json();
+          console.log(result);
+          if (result?.content?.metadata?.symbol) {
+            setTokenSymbol(result.content.metadata.symbol);
+          }
+        } catch (e) {
+          console.error("Failed to fetch symbol", e);
+        }
+      }
+    };
+    fetchSymbol();
+  }, [payDetails?.address]);
+
   const handlePayment = async () => {
     setIsProcessing(true);
     try {
       if (currentChain.name === "Solana") {
         if (!solanaWallet.publicKey) return;
+        setErrorMessage(null);
         const amount = Number(payDetails?.amount);
         const userWallet = solanaWallet.publicKey;
+
+        // Check balance
+        const connection = new Connection(
+          "https://mainnet.helius-rpc.com/?api-key=59d15393-1c14-4115-b919-76b0ba1b6361"
+        );
+        const userPublicKey = new PublicKey(userWallet.toString());
+        const requiredAmount = BigInt(payDetails?.amount || 0);
+        let hasBalance = false;
+
+        if (payDetails?.address) {
+          const mintPublicKey = new PublicKey(payDetails.address);
+          const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+            userPublicKey,
+            { mint: mintPublicKey }
+          );
+          if (tokenAccounts.value.length > 0) {
+            const balanceRaw = BigInt(
+              tokenAccounts.value[0].account.data.parsed.info.tokenAmount.amount
+            );
+            if (balanceRaw >= requiredAmount) hasBalance = true;
+          }
+        } else {
+          const balanceLamports = await connection.getBalance(userPublicKey);
+          if (BigInt(balanceLamports) >= requiredAmount) hasBalance = true;
+        }
+
+        if (!hasBalance) {
+          setErrorMessage("Insufficient balance");
+          setIsProcessing(false);
+          return;
+        }
 
         // Create x402 client
         const client = createX402Client({
@@ -91,10 +156,11 @@ export function PaymentMethods({ payID }) {
             },
             description: payDetails?.description,
             payID: payID,
+            server_callback_api: payDetails?.server_callback_api
           }),
         });
 
-        const result = await response.json();
+        await response.json();
         setShowSuccess(true);
         // } else if (currentChain.name === 'Base') {
         //   const evmWallet = walletProvider;
@@ -191,7 +257,7 @@ export function PaymentMethods({ payID }) {
                 {fixDecimal()}
               </span>
               <span className="text-sm text-muted-foreground">
-                {payDetails?.symbol}
+                {tokenSymbol}
               </span>
             </div>
           </div>
@@ -205,18 +271,22 @@ export function PaymentMethods({ payID }) {
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total</span>
               <span className="font-medium">
-                {fixDecimal()} {payDetails?.symbol}
+                {fixDecimal()} {tokenSymbol}
               </span>
             </div>
           </div>
 
           <Button
             onClick={handlePayment}
-            disabled={isProcessing}
-            className="w-full h-12 bg-white text-black hover:bg-gray-200 font-medium transition-colors rounded-lg"
+            disabled={isProcessing || !isConnected}
+            className={`w-full h-12 bg-white text-black hover:bg-gray-200 font-medium transition-colors rounded-lg ${!isConnected ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {isProcessing ? "Processing..." : "Pay Now"}
           </Button>
+          {errorMessage && (
+            <p className="text-sm text-red-500 text-center">{errorMessage}</p>
+          )}
         </div>
       </div>
 
